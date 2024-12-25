@@ -31,11 +31,19 @@ public class App extends Application {
         stage.setScene(scene);
         stage.show();
     }
+    private static Stage primaryStage;
 
-    static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
+    public static void setPrimaryStage(Stage stage) {
+        primaryStage = stage;
     }
 
+
+    public static void setRoot(String fxml) throws IOException {
+        FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        Parent root = loader.load();
+        primaryStage.setScene(new Scene(root));
+        primaryStage.show();
+    }
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();

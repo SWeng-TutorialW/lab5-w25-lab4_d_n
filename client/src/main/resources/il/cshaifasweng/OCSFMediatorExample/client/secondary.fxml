@@ -1,16 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.SecondaryController">
-    <children>
-        <Label text="Secondary View" />
-        <Button fx:id="secondaryButton" text="Switch to Primary View" onAction="#switchToPrimary" />
-    </children>
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="192.0" prefWidth="135.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label prefHeight="31.0" prefWidth="79.0" text="Player : X">
+         <VBox.margin>
+            <Insets left="5.0" />
+         </VBox.margin>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+         <font>
+            <Font name="System Bold Italic" size="14.0" />
+         </font>
+      </Label>
+      <GridPane fx:id="gridPane" hgap="5" prefHeight="72.0" prefWidth="57.0" vgap="5">
+         <children>
+            <Button fx:id="button00" text=" " GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Button fx:id="button01" text=" " GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Button fx:id="button02" text=" " GridPane.columnIndex="2" />
+            <Button fx:id="button10" text=" " GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Button fx:id="button11" text=" " GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button fx:id="button12" text=" " GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button fx:id="button20" text=" " GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Button fx:id="button21" text=" " GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button fx:id="button22" text=" " GridPane.columnIndex="2" GridPane.rowIndex="2" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+         <VBox.margin>
+            <Insets bottom="20.0" left="10.0" right="20.0" top="20.0" />
+         </VBox.margin>
+      </GridPane>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
 </VBox>
