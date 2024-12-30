@@ -12,6 +12,8 @@ public class SimpleClient extends AbstractClient {
 		super(host, port);
 	}
 
+
+	//handlemessage
 	@Override
 	protected void handleMessageFromServer(Object msg) {
 		//a warning obj
