@@ -11,24 +11,24 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 public class SimpleServer extends AbstractServer {
 	private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
-
-	//0 - O and 1 - X
-	private boolean Turn = false;
 	private String[][] Board = new String[3][3];
+	private boolean Turn = true;
 
 	public SimpleServer(int port) {
 		super(port);
-		
 	}
 
 	@Override
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		String msgString = msg.toString();
-
-		// Ensure #warning messages are processed only when intended
 		if (msgString.startsWith("#warning")) {
-			System.out.println("Received a #warning message. Ignoring as unnecessary.");
-			return; // Skip processing
+			Warning warning = new Warning("Warning from server!");
+			try {
+				client.sendToClient(warning);
+				System.out.format("Sent warning to client %s\n", client.getInetAddress().getHostAddress());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else if (msgString.startsWith("add client")) {
 			SubscribedClient connection = new SubscribedClient(client);
 			SubscribersList.add(connection);
@@ -46,25 +46,28 @@ public class SimpleServer extends AbstractServer {
 					}
 				}
 			}
+
+			/// ////////////////////////////addition////////////////////////////
+
+//        } else if (msgString.startsWith("I'm here")) {
 		} else if (msgString.startsWith("player joined")) {
 			if (SubscribersList.size() == 2) {
 				sendToAllClients("start game");
 			}
-		} else if (msgString.startsWith("player moved")) {
-			writeMove(msgString, client);
+		} else if (msgString.startsWith("player moved ")) {
+			handleMove(msgString, client);
 		}
 	}
 
-
 	//saves the move and checks if someone won/  game over
-	private void writeMove(String msgString, ConnectionToClient client) {
+	private void handleMove(String msgString, ConnectionToClient client) {
 		//get the moves indexes
-		String[] msgParts = msgString.split(" ");
-		int row = Integer.parseInt(msgParts[2]);
-		int col = Integer.parseInt(msgParts[3]);
+		String[] parts = msgString.split(" ");
+		int row = Integer.parseInt(parts[2]);
+		int col = Integer.parseInt(parts[3]);
 
 		//first, update the board
-		String player = Turn? "X" : "O";
+		String player = Turn ? "O" : "X";
 		String moveMsg = row + " " + col + " " + player;
 
 		//check that player can actually make a move
@@ -72,18 +75,14 @@ public class SimpleServer extends AbstractServer {
 			return;
 		}
 
-		//update into board
 		Board[row][col] = player;
-		//tell the clients to update the boards, and the other player's turn
-		sendToAllClients("update board" + moveMsg + "Turn" + (player.equals("O") ? "X" : "O"));
-
-		//check for end cases:
-		if(winCheck()){
-			sendToAllClients("win" + moveMsg);
+		sendToAllClients("update board " + moveMsg + " Turn " + (player.equals("O") ? "X" : "O"));
+		if (winCheck()) {
+			sendToAllClients("done " + moveMsg);
 			return;
 		}
-		if(fullBoard()){
-			sendToAllClients("fullBoard" + moveMsg);
+		if (fullBoard()) {
+			sendToAllClients("over " + moveMsg);
 			return;
 		}
 		//game still on: flip turn
@@ -114,11 +113,14 @@ public class SimpleServer extends AbstractServer {
 				isLineEqual(Board[0][2], Board[1][1], Board[2][0]);   // Anti-diagonal
 	}
 
+
+
+	//HELPER FUNCTION FOR WINCHECK
 	private boolean isLineEqual(String a, String b, String c) {
 		return a != null && !a.isEmpty() && a.equals(b) && b.equals(c);
 	}
 
-
+	// ANOTHER HELPER FUNC
 	private boolean validMove(int row, int col, ConnectionToClient client) {
 		if(Board[row][col] != null){
 			return false;

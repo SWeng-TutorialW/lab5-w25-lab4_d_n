@@ -1,111 +1,109 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
+
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class SecondaryController {
-
-
-    public GridPane gridPane;
-    private boolean isPlayerX = true; // Track the current player
-
-    @FXML private Button button00;
-    @FXML private Button button01;
-    @FXML private Button button02;
-    @FXML private Button button10;
-    @FXML private Button button11;
-    @FXML private Button button12;
-    @FXML private Button button20;
-    @FXML private Button button21;
-    @FXML private Button button22;
-
-    private Button[][] buttons;
+    @FXML
+    private Button button00;
 
     @FXML
+    private Button button01;
+
+    @FXML
+    private Button button02;
+
+    @FXML
+    private Button button10;
+
+    @FXML
+    private Button button11;
+
+    @FXML
+    private Button button12;
+
+    @FXML
+    private Button button20;
+
+    @FXML
+    private Button button21;
+
+    @FXML
+    private Button button22;
+
+    @FXML
+    private Label gameStatus;
+
+    private String[][] Board = new String[3][3];
+    private final Button[][] buttons = new Button[3][3];
+    public SecondaryController() {
+        // Register to EventBus
+    }
+    @FXML
     public void initialize() {
-        // Initialize the 3x3 button grid
-        buttons = new Button[][]{
-                {button00, button01, button02},
-                {button10, button11, button12},
-                {button20, button21, button22}
-        };
-
-        // Add event handlers to buttons
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                final int r = row, c = col;
-                buttons[row][col].setOnAction(e -> handleButtonClick(buttons[r][c]));
-            }
-        }
+        EventBus.getDefault().register(this);
+        buttons[0][0] = button00;
+        buttons[0][1] = button01;
+        buttons[0][2] = button02;
+        buttons[1][0] = button10;
+        buttons[1][1] = button11;
+        buttons[1][2] = button12;
+        buttons[2][0] = button20;
+        buttons[2][1] = button21;
+        buttons[2][2] = button22;
     }
-
-    private void handleButtonClick(Button button) {
-        if (button.getText().isEmpty()) {
-            button.setText(isPlayerX ? "X" : "O");
-            button.setDisable(true); // Disable the button after a move
-            if (checkWin()) {
-                System.out.println((isPlayerX ? "X" : "O") + " wins!");
-                disableAllButtons();
-            } else if (isBoardFull()) {
-                System.out.println("It's a draw!");
-            }
-            isPlayerX = !isPlayerX; // Switch turns
-        }
-    }
-
-    private boolean checkWin() {
-        // Check rows, columns, and diagonals
-        for (int i = 0; i < 3; i++) {
-            if (buttons[i][0].getText().equals(buttons[i][1].getText()) &&
-                    buttons[i][1].getText().equals(buttons[i][2].getText()) &&
-                    !buttons[i][0].getText().isEmpty()) {
-                return true;
-            }
-            if (buttons[0][i].getText().equals(buttons[1][i].getText()) &&
-                    buttons[1][i].getText().equals(buttons[2][i].getText()) &&
-                    !buttons[0][i].getText().isEmpty()) {
-                return true;
-            }
-        }
-        if (buttons[0][0].getText().equals(buttons[1][1].getText()) &&
-                buttons[1][1].getText().equals(buttons[2][2].getText()) &&
-                !buttons[0][0].getText().isEmpty()) {
-            return true;
-        }
-        if (buttons[0][2].getText().equals(buttons[1][1].getText()) &&
-                buttons[1][1].getText().equals(buttons[2][0].getText()) &&
-                !buttons[0][2].getText().isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isBoardFull() {
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                if (buttons[row][col].getText().isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private void disableAllButtons() {
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                buttons[row][col].setDisable(true);
-            }
-        }
-    }
-
 
     @FXML
     private void switchToPrimary() throws IOException {
         App.setRoot("primary");
+    }
+
+    @FXML
+    private void clicked(ActionEvent event) {
+        Button button = (Button) event.getSource();
+        String buttonId = button.getId();
+        int row = Character.getNumericValue(buttonId.charAt(6));
+        int col = Character.getNumericValue(buttonId.charAt(7));
+        try {
+            SimpleClient.getClient().sendToServer("player moved " + row + " " + col);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void handleMessage(Object msg) {
+        Platform.runLater(() -> {
+
+            //game over / winner case
+            if (msg instanceof String) {
+                gameStatus.setText(msg.toString());
+
+                //switch turns
+            } else if (msg instanceof Object[]) {
+                Object[] update = (Object[]) msg;
+                int row = (int) update[0];
+                int col = (int) update[1];
+                String move = (String) update[2];
+
+                //update the label
+                gameStatus.setText("Player : " + update[3].toString());
+
+                //update the button's value
+                Board[row][col] = move;
+                Button button = buttons[row][col];
+                //only change if the button is free
+                if (button != null) {
+                    button.setText(move);
+                }
+            }
+        });
     }
 }
